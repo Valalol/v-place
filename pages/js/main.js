@@ -1,9 +1,10 @@
-// const ip = 'localhost'
-const ip = '192.168.1.44'
-// const ip = '192.168.1.42'
+// const IP = 'localhost'
+// const IP = '192.168.1.44'
+// const IP = '192.168.1.42'
+const IP = '78.123.112.53'
+const PORT = 3000
 
-
-const socket = io(`http://${ip}:3000`);
+const socket = io(`http://${IP}:${PORT}`);
 
 var pixels = [];
 
@@ -36,7 +37,7 @@ async function pixel_placed(row, col, color) {
 
 async function load_data() {
     try {
-        const response = await fetch(`http://${ip}:3000/api/get_pixels`);
+        const response = await fetch(`http://${IP}:${PORT}/api/get_pixels`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
