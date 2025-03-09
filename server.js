@@ -35,6 +35,7 @@ if (fs.existsSync(backupFile)) {
         for (let j = 0; j < width; j++) {
             pixels[i].push({
                 color: "#ffffff",
+                username: "undefined",
                 timestamp: 0
             });
         }
@@ -53,10 +54,11 @@ io.on("connection", (socket) => {
         // pixel_data : {
         //     color : "#ffd000",
         //     position : [12, 14],
+        //     username : "Valalol"
         // }
 
         try {
-            if (!pixel_data.color || !pixel_data.position) return;
+            if (!pixel_data.color || !pixel_data.position || !pixel_data.username) return;
             if (typeof pixel_data.position[0] !== 'number' || typeof pixel_data.position[1] !== 'number') return;
             if (pixel_data.position[0] < 0 || pixel_data.position[0] >= height || pixel_data.position[1] < 0 || pixel_data.position[1] >= width) return;
             if (pixel_data.color == pixels[pixel_data.position[0]][pixel_data.position[1]].color) return;
@@ -69,6 +71,7 @@ io.on("connection", (socket) => {
             io.emit("new_pixel", {
                 color: pixel_data.color,
                 position: pixel_data.position,
+                username: pixel_data.username,
                 timestamp: Date.now()
             })
         } catch (e) {

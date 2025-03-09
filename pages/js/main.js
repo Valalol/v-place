@@ -9,6 +9,7 @@ const socket = io(`http://${IP}:${PORT}`);
 var pixels = [];
 
 const grid = document.getElementById('grid');
+const username_input = document.getElementById('username');
 const color_picker = document.getElementById('color_picker');
 
 socket.on("connect", () => {
@@ -23,15 +24,21 @@ socket.on("disconnect", () => {
 socket.on("new_pixel", (pixel_data) => {
     if (pixel_data.timestamp > pixels[pixel_data.position[0]][pixel_data.position[1]].dataset.timestamp) {
         pixels[pixel_data.position[0]][pixel_data.position[1]].style.backgroundColor = pixel_data.color;
+        pixels[pixel_data.position[0]][pixel_data.position[1]].dataset.username = pixel_data.username;
         pixels[pixel_data.position[0]][pixel_data.position[1]].dataset.timestamp = pixel_data.timestamp;
     }
 })
 
+async function pixel_clicked(row, col) {
+    if (!username_input.value) {
+        alert("Veuillez entrer un nom d'utilisateur");
+        return;
+    }
 
-async function pixel_placed(row, col, color) {
     socket.emit("pixel_placed", {
-        color: color,
-        position: [row, col]
+        color: color_picker.value,
+        position: [row, col],
+        username: username_input.value
     })
 }
 
@@ -56,11 +63,16 @@ async function load_data() {
                 pixel.className = 'cell';
                 pixel.dataset.row = i;
                 pixel.dataset.column = j;
+                pixel.dataset.username = pixel_data[i][j].username;
                 pixel.dataset.timestamp = pixel_data[i][j].timestamp;
-                pixel.style.backgroundColor = pixel_data[i][j].color
+                pixel.style.backgroundColor = pixel_data[i][j].color;
 
                 pixel.addEventListener('click', () => {
-                    pixel_placed(i, j, color_picker.value)
+                    pixel_clicked(i, j);
+                })
+
+                pixel.addEventListener('hover', () => {
+                    
                 })
 
                 grid.appendChild(pixel);

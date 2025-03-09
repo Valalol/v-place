@@ -11,6 +11,12 @@ body {
     align-items: center;
 }
 
+#username {
+    margin: 10px 0 0 0;
+    padding: 8px 15px;
+    border-radius: 10px;
+}
+
 #color_picker {
     margin: 10px 0;
     border: none;
