@@ -46,8 +46,8 @@ async function load_data() {
         grid.innerHTML = ''
         pixels = []
 
-        grid.style.gridTemplateRows = `repeat(${pixel_data.length}, 50px)`;
-        grid.style.gridTemplateColumns = `repeat(${pixel_data[0].length}, 50px)`;
+        grid.style.gridTemplateRows = `repeat(${pixel_data.length}, 1fr)`;
+        grid.style.gridTemplateColumns = `repeat(${pixel_data[0].length}, 1fr)`;
 
         for (let i = 0; i < pixel_data.length; i++) {
             pixels.push([]);

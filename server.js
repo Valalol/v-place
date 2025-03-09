@@ -28,8 +28,8 @@ if (fs.existsSync(backupFile)) {
     height = pixels.length;
     width = pixels[0].length;
 } else {
-    height = 15;
-    width = 15;
+    height = 40;
+    width = 40;
     for (let i = 0; i < height; i++) {
         pixels.push([]);
         for (let j = 0; j < width; j++) {
