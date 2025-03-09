@@ -72,3 +72,12 @@ async function load_data() {
         console.error('Error fetching devices:', error);
     }
 }
+
+color_picker.addEventListener('input', (event) => {
+    localStorage.setItem("color_selected", event.target.value);
+})
+
+color = localStorage.getItem("color_selected");
+if (color != null && color != color_picker.value) {
+    color_picker.value = color;
+}

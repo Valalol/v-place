@@ -109,4 +109,4 @@ setInterval(() => {
             console.log('Pixels sauvegardés dans backup.json');
         }
     });
-}, 60000);
+}, 300000);
