@@ -2,6 +2,8 @@
 // const IP = '192.168.1.44'
 // const IP = '192.168.1.42'
 const IP = '78.123.112.53'
+// const IP = '172.28.235.144'
+// const IP = '192.168.161.174'
 const PORT = 3000
 
 const socket = io(`http://${IP}:${PORT}`);
@@ -11,6 +13,7 @@ var pixels = [];
 const grid = document.getElementById('grid');
 const username_input = document.getElementById('username');
 const color_picker = document.getElementById('color_picker');
+const pixel_info = document.getElementById('pixel_info');
 
 socket.on("connect", () => {
     console.log(`Connecté au serveur avec l'ID ${socket.id}`);
@@ -42,6 +45,20 @@ async function pixel_clicked(row, col) {
     })
 }
 
+function formatMilliseconds(ms) {
+    if (ms < 1000) {
+        return `${ms}ms`;
+    } else if (ms < 60000) {
+        return `${(ms / 1000).toFixed(0)}s`;
+    } else if (ms < 3600000) {
+        return `${(ms / 60000).toFixed(0)}min`;
+    } else if (ms < 86400000) {
+        return `${(ms / 3600000).toFixed(0)}h`;
+    } else {
+        return `${(ms / 86400000).toFixed(0)}j`;
+    }
+}
+
 async function load_data() {
     try {
         const response = await fetch(`http://${IP}:${PORT}/api/get_pixels`);
@@ -71,8 +88,14 @@ async function load_data() {
                     pixel_clicked(i, j);
                 })
 
-                pixel.addEventListener('hover', () => {
-                    
+                pixel.addEventListener('mouseover', () => {
+                    if (!pixel.dataset.username || !pixel.dataset.timestamp) return;
+                    if (pixel.dataset.username == "undefined") {
+                        pixel_info.innerHTML = ``;
+                    } else {
+                        let deltatime = formatMilliseconds(new Date() - pixel.dataset.timestamp)
+                        pixel_info.innerHTML = `Pixel posé par "${pixel.dataset.username}" il y a ${deltatime}`
+                    }
                 })
 
                 grid.appendChild(pixel);

@@ -28,8 +28,8 @@ if (fs.existsSync(backupFile)) {
     height = pixels.length;
     width = pixels[0].length;
 } else {
-    height = 40;
-    width = 40;
+    height = 16;
+    width = 16;
     for (let i = 0; i < height; i++) {
         pixels.push([]);
         for (let j = 0; j < width; j++) {
@@ -65,6 +65,7 @@ io.on("connection", (socket) => {
 
             pixels[pixel_data.position[0]][pixel_data.position[1]] = {
                 color: pixel_data.color,
+                username: pixel_data.username,
                 timestamp: Date.now()
             }
 
