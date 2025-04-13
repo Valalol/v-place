@@ -1,7 +1,8 @@
-// const IP = 'localhost'
+const IP = 'localhost'
+// const IP = '10.1.0.47'
+// const IP = '78.123.112.53'
 // const IP = '192.168.1.44'
 // const IP = '192.168.1.42'
-const IP = '78.123.112.53'
 // const IP = '172.28.235.144'
 // const IP = '192.168.161.174'
 const PORT = 3000
@@ -11,9 +12,52 @@ const socket = io(`http://${IP}:${PORT}`);
 var pixels = [];
 
 const grid = document.getElementById('grid');
+const login_link = document.getElementById('login_link');
 const username_input = document.getElementById('username');
 const color_picker = document.getElementById('color_picker');
 const pixel_info = document.getElementById('pixel_info');
+
+
+async function handleAuthCode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    var code = urlParams.get('code');
+
+    if (code) {
+        const response = await fetch(`http://${IP}:${PORT}/api/get_session_id`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code })
+        });
+
+        console.log(await response.json());
+
+        // localStorage.setItem('sessionId', code);
+        // window.location.href = 'http://localhost:3000/main';
+
+    } else if (localStorage.getItem('auth_code')) {
+        code = localStorage.getItem('auth_code');
+    } else {
+        login_link.style.display = 'block';
+    }
+}
+
+handleAuthCode();
+
+// {
+//     fetch('https://discord.com/api/users/@me', {
+//         headers: {
+//             authorization: `${tokenType} ${accessToken}`,
+//         },
+//     })
+//     .then(result => result.json())
+//     .then(response => {
+//         username_input.value = response.global_name;
+//     })
+//     .catch(console.error);
+// }
+
 
 socket.on("connect", () => {
     console.log(`Connecté au serveur avec l'ID ${socket.id}`);

@@ -16,6 +16,10 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+const clientId = "1359831572320096287";
+const clientSecret = "pDsVJSSwVloWlssZfXiBHLCTezD-skQt";
+
+const PORT = 3000;
 
 const backupFile = 'backup.json';
 let pixels = [];
@@ -88,6 +92,54 @@ app.get("/api/get_pixels", (req, res) => {
     res.status(200).json(pixels);
 });
 
+app.post("/api/get_session_id", async (req, res) => {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: "Session ID is required" });
+
+    try {
+        const tokenResponseData = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
+                code,
+                grant_type: 'authorization_code',
+                redirect_uri: `http://localhost:${PORT}/main`,
+                scope: 'identify',
+            }).toString(),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            }
+        });
+
+        if (tokenResponseData.status !== 200) {
+            return res.status(tokenResponseData.status).json({error: "Failed to fetch access token"});
+        }
+        const oauthData = await tokenResponseData.json();
+
+        const userResult = await fetch('https://discord.com/api/users/@me', {
+            headers: {
+                authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+            }
+        });
+        if (userResult.status !== 200) {
+            return res.status(userResult.status).json({ error: "Failed to fetch user data"});
+        }
+        const userData = await userResult.json();
+
+        console.log(userData);
+
+        const sessionId = crypto.randomUUID();
+        res.status(200).json({
+            sessionId: sessionId,
+            expirationDate: new Date().getTime() + oauthData.expires_in
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "An error occurred while processing the request" });
+    }
+})
 
 app.use('/main', express.static('pages/html/main.html'));
 
@@ -99,7 +151,6 @@ app.get('/', function(req, res) {
     res.redirect('/main');
 })
 
-const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Serveur en ligne sur http://localhost:${PORT}`);
 });
