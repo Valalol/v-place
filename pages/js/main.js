@@ -1,6 +1,6 @@
-const IP = 'localhost'
+// const IP = 'localhost'
 // const IP = '10.1.0.47'
-// const IP = '78.123.112.53'
+const IP = '78.123.112.53'
 // const IP = '192.168.1.44'
 // const IP = '192.168.1.42'
 // const IP = '172.28.235.144'
@@ -13,10 +13,11 @@ var pixels = [];
 
 const grid = document.getElementById('grid');
 const login_link = document.getElementById('login_link');
-const username_input = document.getElementById('username');
+// const username_input = document.getElementById('username');
 const color_picker = document.getElementById('color_picker');
 const pixel_info = document.getElementById('pixel_info');
 
+var sessionId;
 
 async function handleAuthCode() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -30,33 +31,19 @@ async function handleAuthCode() {
             },
             body: JSON.stringify({ code })
         });
+        const responseData = await response.json()
 
-        console.log(await response.json());
+        localStorage.setItem('sessionId', responseData.sessionId);
+        localStorage.setItem('expirationDate', responseData.expirationDate);
+        window.location.href = `http://${IP}:${PORT}/main`;
 
-        // localStorage.setItem('sessionId', code);
-        // window.location.href = 'http://localhost:3000/main';
-
-    } else if (localStorage.getItem('auth_code')) {
-        code = localStorage.getItem('auth_code');
+    } else if (localStorage.getItem('sessionId') && localStorage.getItem('expirationDate') && parseInt(localStorage.getItem('expirationDate')) > new Date().getTime()) {
+        sessionId = localStorage.getItem('sessionId');
     } else {
         login_link.style.display = 'block';
     }
 }
-
 handleAuthCode();
-
-// {
-//     fetch('https://discord.com/api/users/@me', {
-//         headers: {
-//             authorization: `${tokenType} ${accessToken}`,
-//         },
-//     })
-//     .then(result => result.json())
-//     .then(response => {
-//         username_input.value = response.global_name;
-//     })
-//     .catch(console.error);
-// }
 
 
 socket.on("connect", () => {
@@ -77,15 +64,15 @@ socket.on("new_pixel", (pixel_data) => {
 })
 
 async function pixel_clicked(row, col) {
-    if (!username_input.value) {
-        alert("Veuillez entrer un nom d'utilisateur");
+    if (!sessionId) {
+        alert("Veuillez vous connecter via discord");
         return;
     }
 
     socket.emit("pixel_placed", {
         color: color_picker.value,
         position: [row, col],
-        username: username_input.value
+        sessionId: sessionId
     })
 }
 

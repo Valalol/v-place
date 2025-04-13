@@ -1,5 +1,6 @@
 {
     "ignore": [
-        "backup.json"
+        "backup.json",
+        "auth.json"
     ]
 }

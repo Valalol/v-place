@@ -16,10 +16,26 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+const PORT = 3000;
 const clientId = "1359831572320096287";
 const clientSecret = "pDsVJSSwVloWlssZfXiBHLCTezD-skQt";
+var OauthData = {}
+const auth_file = 'auth.json'
 
-const PORT = 3000;
+if (fs.existsSync(auth_file)) {
+    const data = fs.readFileSync(auth_file);
+    OauthData = JSON.parse(data);
+}
+
+function save_auth_data() {
+    fs.writeFile(auth_file, JSON.stringify(OauthData), (err) => {
+        if (err) {
+            console.error('Erreur lors de la sauvegarde des authentifications:', err);
+        } else {
+            console.log(`Authentifications sauvegardés dans ${auth_file}`);
+        }
+    });
+}
 
 const backupFile = 'backup.json';
 let pixels = [];
@@ -54,29 +70,29 @@ io.on("connection", (socket) => {
         console.log(`Appareil ${socket.id} déconnecté`);
     });
 
-    socket.on("pixel_placed", (pixel_data) => {
+    socket.on("pixel_placed", async (pixel_data) => {
         // pixel_data : {
         //     color : "#ffd000",
         //     position : [12, 14],
-        //     username : "Valalol"
+        //     sessionId : "eaa9ff84-e5de-4883-9e27-07ffcd6b41b9"
         // }
 
         try {
-            if (!pixel_data.color || !pixel_data.position || !pixel_data.username) return;
+            if (!pixel_data.color || !pixel_data.position || !pixel_data.sessionId) return;
             if (typeof pixel_data.position[0] !== 'number' || typeof pixel_data.position[1] !== 'number') return;
             if (pixel_data.position[0] < 0 || pixel_data.position[0] >= height || pixel_data.position[1] < 0 || pixel_data.position[1] >= width) return;
             if (pixel_data.color == pixels[pixel_data.position[0]][pixel_data.position[1]].color) return;
 
             pixels[pixel_data.position[0]][pixel_data.position[1]] = {
                 color: pixel_data.color,
-                username: pixel_data.username,
+                username: OauthData[pixel_data.sessionId]['global_name'],
                 timestamp: Date.now()
             }
 
             io.emit("new_pixel", {
                 color: pixel_data.color,
                 position: pixel_data.position,
-                username: pixel_data.username,
+                username: OauthData[pixel_data.sessionId]['global_name'],
                 timestamp: Date.now()
             })
         } catch (e) {
@@ -104,7 +120,7 @@ app.post("/api/get_session_id", async (req, res) => {
                 client_secret: clientSecret,
                 code,
                 grant_type: 'authorization_code',
-                redirect_uri: `http://localhost:${PORT}/main`,
+                redirect_uri: `http://78.123.112.53:${PORT}/main`,
                 scope: 'identify',
             }).toString(),
             headers: {
@@ -126,14 +142,16 @@ app.post("/api/get_session_id", async (req, res) => {
             return res.status(userResult.status).json({ error: "Failed to fetch user data"});
         }
         const userData = await userResult.json();
-
-        console.log(userData);
+        // console.log(userData);
 
         const sessionId = crypto.randomUUID();
+        OauthData[sessionId] = userData
+
         res.status(200).json({
             sessionId: sessionId,
             expirationDate: new Date().getTime() + oauthData.expires_in
         });
+        save_auth_data();
 
     } catch (error) {
         console.error(error);
@@ -157,11 +175,11 @@ server.listen(PORT, () => {
 
 
 setInterval(() => {
-    fs.writeFile('backup.json', JSON.stringify(pixels), (err) => {
+    fs.writeFile(backupFile, JSON.stringify(pixels), (err) => {
         if (err) {
             console.error('Erreur lors de la sauvegarde des pixels:', err);
         } else {
             console.log('Pixels sauvegardés dans backup.json');
         }
     });
-}, 300000);
+}, 60000);
