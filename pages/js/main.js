@@ -1,6 +1,6 @@
-// const IP = 'localhost'
+const IP = 'localhost'
 // const IP = '10.1.0.47'
-const IP = '78.123.112.53'
+// const IP = '78.123.112.53'
 // const IP = '192.168.1.44'
 // const IP = '192.168.1.42'
 // const IP = '172.28.235.144'

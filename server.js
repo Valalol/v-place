@@ -17,6 +17,13 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = 3000;
+const IP = 'localhost'
+// const IP = '10.1.0.47'
+// const IP = '78.123.112.53'
+// const IP = '192.168.1.44'
+// const IP = '192.168.1.42'
+// const IP = '172.28.235.144'
+// const IP = '192.168.161.174'
 const clientId = "1359831572320096287";
 const clientSecret = "pDsVJSSwVloWlssZfXiBHLCTezD-skQt";
 var OauthData = {}
@@ -120,7 +127,7 @@ app.post("/api/get_session_id", async (req, res) => {
                 client_secret: clientSecret,
                 code,
                 grant_type: 'authorization_code',
-                redirect_uri: `http://78.123.112.53:${PORT}/main`,
+                redirect_uri: `http://${IP}:${PORT}/main`,
                 scope: 'identify',
             }).toString(),
             headers: {
@@ -170,7 +177,7 @@ app.get('/', function(req, res) {
 })
 
 server.listen(PORT, () => {
-    console.log(`Serveur en ligne sur http://localhost:${PORT}`);
+    console.log(`Serveur en ligne sur http://${IP}:${PORT}`);
 });
 
 
